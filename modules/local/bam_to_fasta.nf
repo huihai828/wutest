@@ -2,7 +2,7 @@
 // Convert a BAM file into a FASTA sequence file
 //
 
-process COUNT_BAM_READS {
+process BAM_TO_FASTA {
     tag "$meta.id"
     label 'process_single'
 
