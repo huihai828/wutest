@@ -87,7 +87,7 @@ class BedReader:
         """
         line = self._filter_headers()
         numcols = len(line.strip().split())   # number of columns of the first BED item
-        while line:
+        while line.strip():
             entry = self._parse_bed_item(line)
             if len(entry) == numcols:
                 yield entry
