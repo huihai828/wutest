@@ -27,9 +27,9 @@ workflow DEDUPE_BAM {
 
     emit:
     bam      = PICARD_MARKDUPLICATES.out.bam           // channel: [ val(meta), [ bam ] ]
-    bai      = SAMTOOLS_INDEX.out.bai          // channel: [ val(meta), [ bai ] ]
-    csi      = SAMTOOLS_INDEX.out.csi          // channel: [ val(meta), [ csi ] ]
-    metrics  = PICARD_MARKDUPLICATES.out.metrics        // channel: [ val(meta), [ metrics ] ]
+    bai      = SAMTOOLS_INDEX.out.bai                  // channel: [ val(meta), [ bai ] ]
+    csi      = SAMTOOLS_INDEX.out.csi                  // channel: [ val(meta), [ csi ] ]
+    metrics  = PICARD_MARKDUPLICATES.out.metrics       // channel: [ val(meta), [ metrics ] ]
 
 
     versions = ch_versions                     // channel: [ versions.yml ]
