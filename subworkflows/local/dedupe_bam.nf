@@ -2,7 +2,7 @@
 // Deduplicate BAM file using picard and index it using samtools
 //
 
-include { PICARD_MARKDUPLICATES } from '../../modules/nf-core/picard/markduplicates/main'
+include { PICARD_MARKDUPLICATES } from '../../modules/local/picard_markduplicates'
 include { SAMTOOLS_INDEX        } from '../../modules/nf-core/samtools/index/main'
 
 workflow DEDUPE_BAM {
@@ -16,9 +16,7 @@ workflow DEDUPE_BAM {
 
 
     PICARD_MARKDUPLICATES (
-        ch_bam,
-        [[:], []],
-        [[:], []]
+        ch_bam
     )
     ch_versions = ch_versions.mix(PICARD_MARKDUPLICATES.out.versions.first())
 
@@ -27,9 +25,9 @@ workflow DEDUPE_BAM {
 
     emit:
     bam      = PICARD_MARKDUPLICATES.out.bam           // channel: [ val(meta), [ bam ] ]
+    metrics  = PICARD_MARKDUPLICATES.out.metrics       // channel: [ val(meta), [ metrics ] ]
     bai      = SAMTOOLS_INDEX.out.bai                  // channel: [ val(meta), [ bai ] ]
     csi      = SAMTOOLS_INDEX.out.csi                  // channel: [ val(meta), [ csi ] ]
-    metrics  = PICARD_MARKDUPLICATES.out.metrics       // channel: [ val(meta), [ metrics ] ]
 
 
     versions = ch_versions                     // channel: [ versions.yml ]

@@ -1,3 +1,6 @@
+//
+// Remove duplicate reads from BAM file
+//
 process PICARD_MARKDUPLICATES {
     tag "$meta.id"
     label 'process_medium'
@@ -9,12 +12,9 @@ process PICARD_MARKDUPLICATES {
 
     input:
     tuple val(meta), path(bam)
-    tuple val(meta2), path(fasta)
-    tuple val(meta3), path(fai)
 
     output:
     tuple val(meta), path("*.bam")        , emit: bam
-    tuple val(meta), path("*.bai")        , optional:true, emit: bai
     tuple val(meta), path("*.metrics.txt"), emit: metrics
     path  "versions.yml"                  , emit: versions
 
@@ -40,7 +40,6 @@ process PICARD_MARKDUPLICATES {
         $args \\
         --INPUT $bam \\
         --OUTPUT ${prefix}.bam \\
-        --REFERENCE_SEQUENCE $fasta \\
         --METRICS_FILE ${prefix}.MarkDuplicates.metrics.txt
 
     cat <<-END_VERSIONS > versions.yml
@@ -49,17 +48,4 @@ process PICARD_MARKDUPLICATES {
     END_VERSIONS
     """
 
-    stub:
-    def prefix = task.ext.prefix ?: "${meta.id}"
-    if ("$bam" == "${prefix}.bam") error "Input and output names are the same, use \"task.ext.prefix\" to disambiguate!"
-    """
-    touch ${prefix}.bam
-    touch ${prefix}.bam.bai
-    touch ${prefix}.MarkDuplicates.metrics.txt
-
-    cat <<-END_VERSIONS > versions.yml
-    "${task.process}":
-        picard: \$(echo \$(picard MarkDuplicates --version 2>&1) | grep -o 'Version:.*' | cut -f2- -d:)
-    END_VERSIONS
-    """
 }

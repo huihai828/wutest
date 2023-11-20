@@ -17,7 +17,7 @@ workflow EXTRACT_BAM_READS {
 
     BEDTOOLS_INTERSECT (
         ch_bam_bed,
-        [[:], []],
+        [[:], []]
     )
     ch_versions = ch_versions.mix(BEDTOOLS_INTERSECT.out.versions.first())
 

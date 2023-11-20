@@ -13,7 +13,7 @@ def summary_params = paramsSummaryMap(workflow)
 // Print parameter summary log to screen
 log.info logo + paramsSummaryLog(workflow) + citation
 
-WorkflowNctest.initialise(params, log)
+WorkflowWutest.initialise(params, log)
 
 
 // Check input path parameters to see if they exist
@@ -78,7 +78,7 @@ include { BAM_STATS_SAMTOOLS as BAM_STATS_CLEANED  } from '../subworkflows/nf-co
 // Info required for completion email and summary
 def multiqc_report = []
 
-workflow NCTEST {
+workflow WUTEST {
 
     ch_versions = Channel.empty()
 
@@ -106,13 +106,11 @@ workflow NCTEST {
     //
     // SUBWORKFLOW: get BAM stats for original BAM file
     //
-    if (!params.skip_picard || !params.skip_filter) {
-        BAM_STATS_ORIGINAL (
-            ch_sort_bam_bai,
-            [[:], []]
-        )
-        ch_versions = ch_versions.mix(BAM_STATS_ORIGINAL.out.versions)
-    }
+    BAM_STATS_ORIGINAL (
+        ch_sort_bam_bai,
+        [[:], []]
+    )
+    ch_versions = ch_versions.mix(BAM_STATS_ORIGINAL.out.versions)
 
 
     //
@@ -158,7 +156,7 @@ workflow NCTEST {
     // MODULE: count reads from BAM file for regions
     //
     COUNT_BAM_READS (
-        ch_sort_bam_bai
+        ch_sort_bam_bai,
         ch_bedfile
     )
     ch_versions = ch_versions.mix(COUNT_BAM_READS.out.versions)
@@ -186,10 +184,10 @@ workflow NCTEST {
     // MODULE: MultiQC
     //
     if (!params.skip_multiqc) {
-        workflow_summary    = WorkflowNctest.paramsSummaryMultiqc(workflow, summary_params)
+        workflow_summary    = WorkflowWutest.paramsSummaryMultiqc(workflow, summary_params)
         ch_workflow_summary = Channel.value(workflow_summary)
 
-        methods_description    = WorkflowNctest.methodsDescriptionText(workflow, ch_multiqc_custom_methods_description, params)
+        methods_description    = WorkflowWutest.methodsDescriptionText(workflow, ch_multiqc_custom_methods_description, params)
         ch_methods_description = Channel.value(methods_description)
 
         ch_multiqc_files = Channel.empty()
