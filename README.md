@@ -1,109 +1,184 @@
-# ![nf-core/wutest](docs/images/nf-core-wutest_logo_light.png#gh-light-mode-only) ![nf-core/wutest](docs/images/nf-core-wutest_logo_dark.png#gh-dark-mode-only)
+# Pipeline - wutest
 
-[![GitHub Actions CI Status](https://github.com/nf-core/wutest/workflows/nf-core%20CI/badge.svg)](https://github.com/nf-core/wutest/actions?query=workflow%3A%22nf-core+CI%22)
-[![GitHub Actions Linting Status](https://github.com/nf-core/wutest/workflows/nf-core%20linting/badge.svg)](https://github.com/nf-core/wutest/actions?query=workflow%3A%22nf-core+linting%22)[![AWS CI](https://img.shields.io/badge/CI%20tests-full%20size-FF9900?labelColor=000000&logo=Amazon%20AWS)](https://nf-co.re/wutest/results)[![Cite with Zenodo](http://img.shields.io/badge/DOI-10.5281/zenodo.XXXXXXX-1073c8?labelColor=000000)](https://doi.org/10.5281/zenodo.XXXXXXX)
+## Pipeline summary
 
-[![Nextflow](https://img.shields.io/badge/nextflow%20DSL2-%E2%89%A523.04.0-23aa62.svg)](https://www.nextflow.io/)
-[![run with conda](http://img.shields.io/badge/run%20with-conda-3EB049?labelColor=000000&logo=anaconda)](https://docs.conda.io/en/latest/)
-[![run with docker](https://img.shields.io/badge/run%20with-docker-0db7ed?labelColor=000000&logo=docker)](https://www.docker.com/)
-[![run with singularity](https://img.shields.io/badge/run%20with-singularity-1d355c.svg?labelColor=000000)](https://sylabs.io/docs/)
-[![Launch on Nextflow Tower](https://img.shields.io/badge/Launch%20%F0%9F%9A%80-Nextflow%20Tower-%234256e7)](https://tower.nf/launch?pipeline=https://github.com/nf-core/wutest)
+The 'wutest' pipeline is designed as a test pipeline for the Bioinformatics Pipeline Developer Project. This pipeline adheres to the structure of Nextflow's nf-core. It operates by taking inputs in the form of a samplesheet CSV file, BAM files, and a BED file. The primary tasks it performs include:
+1. Generating read counts for the specified regions outlined in the provided BED file, producing output in JSON format.
+2. Extracting reads within these regions and converting them into a FASTA file.
 
-[![Get help on Slack](http://img.shields.io/badge/slack-nf--core%20%23wutest-4A154B?labelColor=000000&logo=slack)](https://nfcore.slack.com/channels/wutest)[![Follow on Twitter](http://img.shields.io/badge/twitter-%40nf__core-1DA1F2?labelColor=000000&logo=twitter)](https://twitter.com/nf_core)[![Follow on Mastodon](https://img.shields.io/badge/mastodon-nf__core-6364ff?labelColor=FFFFFF&logo=mastodon)](https://mstdn.science/@nf_core)[![Watch on YouTube](http://img.shields.io/badge/youtube-nf--core-FF0000?labelColor=000000&logo=youtube)](https://www.youtube.com/c/nf-core)
+The pipeline's workflow and applied tools and scripts can be described as follows:
+1. Sort and index BAM file
+    - Samtools sort
+    - Samtools index
+2. QC for orignal BAM files
+    - Samtools stats
+    - Samtools flagstat
+    - Samtools idxstats
+3. Preprocessing BAM reads (optional)
+    1. Remove duplicates
+        - Picard markduplicates
+    2. Filter alignments
+        - Samtools view
+4. QC for preprocessed BAM files
+    - Samtools stats
+    - Samtools flagstat
+    - Samtools idxstats
+5. Count reads for the BED regions
+    - count_reads_from_bam.py
+6. Extract reads in the BED regions
+    - Bedtools intersect
+    - convert_bam_to_fasta.py
 
-## Introduction
+## Installation
 
-**nf-core/wutest** is a bioinformatics pipeline that ...
+The pipeline can be directly downloaded from its Github repository: <https://github.com/huihai828/wutest>, or use Git to download the reposity with following command-line:
+```bash
+git clone https://github.com/huihai828/wutest.git
+```
+To get the pipeline executed, it is essential to have Nextflow installed alongside Docker (alternatively Singularity or Conda). Nextflow can resolve the software dependencies (container images or environments) used in the pipelines when running the pipeline for the first time with specific profile (e.g. docker, singularity, conda).
 
-<!-- TODO nf-core:
-   Complete this sentence with a 2-3 sentence summary of what types of data the pipeline ingests, a brief overview of the
-   major pipeline sections and the types of output it produces. You're giving an overview to someone new
-   to nf-core here, in 15-20 seconds. For an example, see https://github.com/nf-core/rnaseq/blob/master/README.md#introduction
--->
-
-<!-- TODO nf-core: Include a figure that guides the user through the major workflow steps. Many nf-core
-     workflows use the "tube map" design for that. See https://nf-co.re/docs/contributing/design_guidelines#examples for examples.   -->
-<!-- TODO nf-core: Fill in short bullet-pointed list of the default steps in the pipeline -->
-
-1. Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))
-2. Present QC for raw reads ([`MultiQC`](http://multiqc.info/))
+If any issues arise during the execution of the pipeline using Docker containers, you have the option to manually install the required Docker images listed as follows:
+```bash
+docker pull quay.io/biocontainers/samtools:1.17--h00cdaf9_0
+docker pull quay.io/biocontainers/bedtools:2.31.0--hf5e1c6e_2
+docker pull quay.io/biocontainers/picard:3.1.0--hdfd78af_0
+docker pull quay.io/biocontainers/python:3.8.3
+docker pull quay.io/biocontainers/mulled-v2-57736af1eb98c01010848572c9fec9fff6ffaafd:402e865b8f6af2f3e58c6fc8d57127ff0144b2c7-0
+```
 
 ## Usage
 
-:::note
-If you are new to Nextflow and nf-core, please refer to [this page](https://nf-co.re/docs/usage/installation) on how
-to set-up Nextflow. Make sure to [test your setup](https://nf-co.re/docs/usage/introduction#how-to-run-a-pipeline)
-with `-profile test` before running the workflow on actual data.
-:::
-
-<!-- TODO nf-core: Describe the minimum required steps to execute the pipeline, e.g. how to prepare samplesheets.
-     Explain what rows and columns represent. For instance (please edit as appropriate):
-
-First, prepare a samplesheet with your input data that looks as follows:
-
-`samplesheet.csv`:
-
-```csv
-sample,fastq_1,fastq_2
-CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
-```
-
-Each row represents a fastq file (single-end) or a pair of fastq files (paired end).
-
--->
-
-Now, you can run the pipeline using:
-
-<!-- TODO nf-core: update the following command to include all required parameters for a minimal example -->
-
+Once you downloaded the pipeline, you can perform test run with following command-lines:
 ```bash
-nextflow run nf-core/wutest \
-   -profile <docker/singularity/.../institute> \
-   --input samplesheet.csv \
-   --outdir <OUTDIR>
+cd path-to/nf-core-wutest
+nextflow run . --outdir results -profile test,docker
+```
+You can check the output files in folder 'path-to/nf-core-wutest/results', where 'path-to' is where the pipeline was installed. The test use the data located in 'path-to/nf-core-wutest/assets/data'.
+
+To run the pipeline for your BAM files, firstly you need to prepare a samplesheet file in CSV format which looks like as follows:
+
+**samplesheet.csv**:
+```
+sample,bam_file
+sample1,/path-to/sampl1.bam
+sample2,/path-to/sampl2.bam
 ```
 
-:::warning
-Please provide pipeline parameters via the CLI or Nextflow `-params-file` option. Custom config files including those
-provided by the `-c` Nextflow option can be used to provide any configuration _**except for parameters**_;
-see [docs](https://nf-co.re/usage/configuration#custom-configuration-files).
-:::
+### Run pipeline with docker
 
-For more details and further functionality, please refer to the [usage documentation](https://nf-co.re/wutest/usage) and the [parameter documentation](https://nf-co.re/wutest/parameters).
+You can run the pipeline with Docker if you have Docker installed. The command-line is as follows:
+```bash
+nextflow run path-to/nf-core-nctest --input samplesheet.csv --bed_file test.bed.gz --outdir results -profile docker
+```
 
-## Pipeline output
+### Run pipeline with singularity
+You can run the pipeline with Singularity if you have Singularity installed. The command-line is as follows:
+```bash
+nextflow run path-to/nf-core-nctest --input samplesheet.csv --bed_file test.bed.gz --outdir results -profile singularity
+```
 
-To see the results of an example test run with a full size dataset refer to the [results](https://nf-co.re/wutest/results) tab on the nf-core website pipeline page.
-For more details about the output files and reports, please refer to the
-[output documentation](https://nf-co.re/wutest/output).
+It is good to set a environmental variable NXF_SINGULARITY_CACHEDIR to store and re-use the images from a central location for future pipeline runs especially when using a computing cluster. The command-line is as follows:
+```bash
+export NXF_SINGULARITY_CACHEDIR=path-to-singularity-images
+```
 
-## Credits
+### Run pipeline with Conda
+You can run the pipeline with Conda if you have Conda installed. The command-line is as follows:
+```bash
+nextflow run path-to/nf-core-nctest --input samplesheet.csv --bed_file test.bed.gz --outdir results -profile conda
+```
+Note that Conda is considered as last resort by Nextflow since its poorer reproducibility than Docker/Singularity.
 
-nf-core/wutest was originally written by Huihai Wu.
+### Run pipeline using Gitpod
+You can also quickly setup a virtual machine and test the pipeline using Gitpod using your Github account. The steps is as follows:
+1. Log on your Github account, then open your Gitpod workspace with link: <https://gitpod.io/workspaces>
+2. Click button 'New Workspace' to create a new Workspace with repository link: <https://github.com/huihai828/wutest/tree/master>
+3. It will create a virtual machine and open a workspace window, then run test in terminal as follows:
+```bash
+nextflow run . --outdir results -profile test,docker
+```
+You will find all the output files in subfolder 'results'.
 
-We thank the following people for their extensive assistance in the development of this pipeline:
+### Parameters
 
-<!-- TODO nf-core: If applicable, make list of people who have also contributed -->
+The pipeline wutest has following parameters:
 
-## Contributions and Support
+| Parameter   | Description |
+| ----------- | ----------- |
+| --input  \<samplesheet.csv> | Input samplesheet file in CSV format |
+| --bed_file \<BED file> | Input BED file |
+| --outdir \<directory> | Specify a output directory |
+| -profile \<config profile> | Specify a config profile to run the pipeline, which can be docker, singularity and conda |
+| --skip_picard \<true/false> | A Boolean option, if set true the pipeline will skip removing the duplicate reads from BAM file with module PICARD_MARKDUPLICATES, default is false |
+| --skip_filter \<true/false> | A Boolean option, if set true the pipeline will skip filtering the BAM file with subworkflow FILTER_BAM, default is false |
+| --skip_multiqc \<true/false> | A Boolean option, if set true the pipeline will skip the module MULTIQC, default is false |
+| --samtools_view_args \<args> | A string of args used by module SAMTOOLS_VIEW, the defualt is '-q 0 -f 2 -F 512' which means only extracting QC-passed reads |
+| --save_reference \<true/false> | A Boolean option, if set true the pipeline will save all the intermediate output files apart from end results, default is true |
 
-If you would like to contribute to this pipeline, please see the [contributing guidelines](.github/CONTRIBUTING.md).
+For example, following command-line will run the pipeline by skipping PICARD_MARKDUPLICATES and filtering out reads with mapping quality larger than 10.
+```bash
+nextflow run path-to/nf-core-nctest --input samplesheet.csv --bed_file test.bed.gz --outdir results -profile docker --skip_picard true --samtools_view_args "-q 10"
+```
 
-For further information or help, don't hesitate to get in touch on the [Slack `#wutest` channel](https://nfcore.slack.com/channels/wutest) (you can join with [this invite](https://nf-co.re/join/slack)).
+## Outputs
 
-## Citations
+If the pipeline runs successfully, it will produce output files in predefined directories under output directory. The output directories and files for test profile are as follows:
 
-<!-- TODO nf-core: Add citation for pipeline after first release. Uncomment lines below and update Zenodo doi and badge at the top of this file. -->
-<!-- If you use  nf-core/wutest for your analysis, please cite it using the following doi: [10.5281/zenodo.XXXXXX](https://doi.org/10.5281/zenodo.XXXXXX) -->
+| Directory   | Files | Description |
+| ----------- | ----------- |----------- |
+| bam  | sample1_T1.sorted.bam<br>sample1_T1.sorted.bam.bai<br>sample1_T1.dedupe.bam<br>sample1_T1.dedupe.bam.bai<br>sample1_T1.filtered.bam<br>sample1_T1.filtered.bam.bai<br>sample1_T1.regions.bam<br> | Bam files with suffix '.sorted.bam' are produced by subworkflow SORT_BAM<br>Bam files with suffix '.filtered.bam' are produced by subworkflow FILTER_BAM<br>Bam files with suffix '.dedupe.bam' are produced by subworkflow DEDUPE_BAM<br>Bam files with suffix '.regions.bam' are produced by subworkflow EXTRACT_BAM_READS  |
+| bam_stats   | sample1_T1.original.bam.stats<br>sample1_T1.original.bam.flagstat<br>sample1_T1.original.bam.idxstats<br>sample1_T1.cleaned.bam.stats<br>sample1_T1.cleaned.bam.flagstat<br>sample1_T1.cleaned.bam.idxstats | These are QC resutls produced by subworkflow BAM_STATS_SAMTOOLS; files with infix '.original' are for input BAM files, and files with infix '.cleaned' are for preprocessed BAM files. |
+| picard_metrics   | sample1_T1.dedupe.MarkDuplicates.metrics.txt | Produced by subworkflow DEDUPE_BAM; a metrics file indicating the numbers of duplicates for both single- and paired-end reads. |
+| read_counts   | sample1_T1.readcounts.json | Produced by module COUNT_BAM_READS; a JSON file showing BED region information and corresponding read counts.|
+| fasta   | sample1_T1.regions.fasta | Produced by subworkflow EXTRACT_BAM_READS; a FASTA file extracted from BAM file in regions defined in a BED file. |
+| multiqc   | multiqc_report.html | MultiQC report HTML file which shows the QC resuls with plots. The related data and plots are in subfolders multiqc_data and multiqc_plots |
+| pipeline_info   | execution_report_2023-11-20_15-55-32.html<br>execution_timeline_2023-11-20_15-55-32.html<br>pipeline_dag_2023-11-20_15-55-32.html<br>params_2023-11-20_15-56-39.json<br>execution_trace_2023-11-20_15-55-32.txt<br>software_versions.yml<br>samplesheet.valid.csv | These files showing pipeline runing information produced by Nextflow. |
 
-<!-- TODO nf-core: Add bibliography of tools and data used in your pipeline -->
+## Testing
 
-An extensive list of references for the tools used by the pipeline can be found in the [`CITATIONS.md`](CITATIONS.md) file.
+### Testing for Python scripts
 
-You can cite the `nf-core` publication as follows:
+The functionality of a Python script can be tested using pytest package.
+I did test for script 'count_reads_from_bam.py'. The test script is 'test_count_reads_from_bam.py' in 'bin/tests', and run the test with following command-lines:
+```bash
+cd path-to/nf-core-nctest/bin/tests
+pytest
+```
+It will get test data from subfolder 'test_data' and perform 5 unit tests.
 
-> **The nf-core framework for community-curated bioinformatics pipelines.**
->
-> Philip Ewels, Alexander Peltzer, Sven Fillinger, Harshil Patel, Johannes Alneberg, Andreas Wilm, Maxime Ulysse Garcia, Paolo Di Tommaso & Sven Nahnsen.
->
-> _Nat Biotechnol._ 2020 Feb 13. doi: [10.1038/s41587-020-0439-x](https://dx.doi.org/10.1038/s41587-020-0439-x).
+### Testing pipeline using nf-test
+
+Tool nf-test is able to test all levels of components (modules, subworkflows and whole pipeline) for a pipeline. Firstly we need to install nf-test with following command-line:
+ ```bash
+curl -fsSL https://code.askimed.com/install/nf-test | bash
+```
+For demonstration, I did following tests.
+
+**Testing for module SAMTOOLS_VIEW**
+
+The relevant command-lines are as follows:
+ ```bash
+cd path-to/nf-core-nctest
+nf-test generate process modules/nf-core/samtools/view/main.nf
+nf-test test tests/modules/nf-core/samtools/view/main.nf.test
+```
+This test will produce a reference snapshot file 'main.nf.test.snap' for repeated testing.
+
+**Testing for subworkflow FILTER_BAM**
+
+The relevant command-lines are as follows:
+ ```bash
+cd path-to/nf-core-nctest
+nf-test generate workflow subworkflows/local/filter_bam.nf
+nf-test test tests/subworkflows/local/filter_bam.nf.test
+```
+This test will produce a reference snapshot file 'filter_bam.nf.test.snap' for repeated testing.
+
+**Testing for whole pipeline**
+
+This test can check execution correctness and integrity of output files for whole pipeline. The relevant command-lines are as follows:
+ ```bash
+cd path-to/nf-core-nctest
+nf-test generate pipeline main.nf
+nf-test test tests/main.nf.test
+``` 
