@@ -266,8 +266,52 @@
                     "help_text": "Allows string values that are parseable as numbers or booleans. For further information see [JSONSchema docs](https://github.com/everit-org/json-schema#lenient-mode)."
                 }
             }
+        },
+        "my_pipeline_options": {
+            "title": "My pipeline options",
+            "type": "object",
+            "fa_icon": "fas fa-university",
+            "properties": {
+                "bed_file": {
+                    "type": "string",
+                    "default": "None"
+                },
+                "save_reference": {
+                    "type": "boolean",
+                    "default": "true"
+                },
+                "samtools_view_args": {
+                    "type": "string",
+                    "default": "-q 0 -f 2 -F 512"
+                },
+                "skip_picard": {
+                    "type": "boolean",
+                    "default": "false"
+                },
+                "skip_filter": {
+                    "type": "boolean",
+                    "default": "false"
+                },
+                "skip_bamstats": {
+                    "type": "boolean",
+                    "default": "false"
+                },
+                "skip_bamqc": {
+                    "type": "boolean",
+                    "default": "false"
+                },
+                "skip_multiqc": {
+                    "type": "boolean",
+                    "default": "false"
+                },
+                "monochromeLogs": {
+                    "type": "string",
+                    "default": "None"
+                }
+            }
         }
     },
+
     "allOf": [
         {
             "$ref": "#/definitions/input_output_options"
@@ -283,6 +327,9 @@
         },
         {
             "$ref": "#/definitions/generic_options"
+        },
+        {
+            "$ref": "#/definitions/my_pipeline_options"
         }
     ]
 }
