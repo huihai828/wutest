@@ -1,0 +1,31 @@
+nextflow_workflow {
+
+    name "Test Workflow FILTER_BAM"
+    script "subworkflows/local/filter_bam.nf"
+    workflow "FILTER_BAM"
+
+    test("Should run without failures") {
+
+        when {
+            params {
+                // define parameters here
+                outdir = "$outputDir"
+            }
+            workflow {
+                """
+                // define inputs of the workflow here
+                input[0] = [
+                            [ id: 'test'],
+                            [ file("assets/data/sorted_mt.bam")],
+                            [ file("assets/data/sorted_mt.bam.bai")]
+                        ]
+                """
+            }
+        }
+
+        then {
+            assert workflow.success
+            assert snapshot(workflow.out).match()
+        }
+    }
+}

@@ -1,0 +1,55 @@
+{
+    "Should run without failures": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.filtered.bam:md5,bdb7e02a8b3957560ab55f507663388b"
+                    ]
+                ],
+                "1": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.filtered.bam.bai:md5,fa8edbb98f4fa2f74da0692a399181b1"
+                    ]
+                ],
+                "2": [
+                    
+                ],
+                "3": [
+                    "versions.yml:md5,d2dcfceedca9886048645a0305f030b0",
+                    "versions.yml:md5,9007dbec5d82177b84b64777d8246a56"
+                ],
+                "bai": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.filtered.bam.bai:md5,fa8edbb98f4fa2f74da0692a399181b1"
+                    ]
+                ],
+                "bam": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.filtered.bam:md5,bdb7e02a8b3957560ab55f507663388b"
+                    ]
+                ],
+                "csi": [
+                    
+                ],
+                "versions": [
+                    "versions.yml:md5,d2dcfceedca9886048645a0305f030b0",
+                    "versions.yml:md5,9007dbec5d82177b84b64777d8246a56"
+                ]
+            }
+        ],
+        "timestamp": "2023-11-21T12:07:35+0000"
+    }
+}

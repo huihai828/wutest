@@ -1,0 +1,38 @@
+nextflow_pipeline {
+
+    name "Test Workflow main.nf"
+    script "main.nf"
+    profile "test,docker"
+
+    test("Should run without failures") {
+
+        when {
+            params {
+                // define parameters here
+                outdir = "$outputDir"
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.success },
+                { assert new File("$outputDir/bam/sample1_T1.sorted.bam").exists() },
+                { assert new File("$outputDir/bam/sample1_T1.sorted.bam.bai").exists() },
+                { assert new File("$outputDir/bam/sample1_T1.dedupe.bam").exists() },
+                { assert new File("$outputDir/bam/sample1_T1.dedupe.bam.bai").exists() },
+                { assert new File("$outputDir/bam/sample1_T1.filtered.bam").exists() },
+                { assert new File("$outputDir/bam/sample1_T1.filtered.bam.bai").exists() },
+                { assert new File("$outputDir/bam/sample1_T1.regions.bam").exists() },
+                { assert new File("$outputDir/bam_stats/sample1_T1.original.bam.stats").exists() },
+                { assert new File("$outputDir/bam_stats/sample1_T1.original.bam.flagstat").exists() },
+                { assert new File("$outputDir/bam_stats/sample1_T1.original.bam.idxstats").exists() },
+                { assert new File("$outputDir/bam_stats/sample1_T1.cleaned.bam.stats").exists() },
+                { assert new File("$outputDir/bam_stats/sample1_T1.cleaned.bam.flagstat").exists() },
+                { assert new File("$outputDir/bam_stats/sample1_T1.cleaned.bam.idxstats").exists() },
+                { assert new File("$outputDir/read_counts/sample1_T1.readcounts.json").exists() },
+                { assert new File("$outputDir/fasta/sample1_T1.regions.fasta").exists() },
+                { assert new File("$outputDir/multiqc/multiqc_report.html").exists() }
+            )
+        }
+    }
+}
