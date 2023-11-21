@@ -50,10 +50,10 @@ docker pull quay.io/biocontainers/mulled-v2-57736af1eb98c01010848572c9fec9fff6ff
 
 Once you downloaded the pipeline, you can perform test run with following command-lines:
 ```bash
-cd path-to/nf-core-wutest
+cd path-to/wutest
 nextflow run . --outdir results -profile test,docker
 ```
-You can check the output files in folder 'path-to/nf-core-wutest/results', where 'path-to' is where the pipeline was installed. The test use the data located in 'path-to/nf-core-wutest/assets/data'.
+You can check the output files in folder 'path-to/wutest/results', where 'path-to' is where the pipeline was installed. The test use the data located in 'path-to/wutest/assets/data'.
 
 To run the pipeline for your BAM files, firstly you need to prepare a samplesheet file in CSV format which looks like as follows:
 
@@ -68,13 +68,13 @@ sample2,/path-to/sampl2.bam
 
 You can run the pipeline with Docker if you have Docker installed. The command-line is as follows:
 ```bash
-nextflow run path-to/nf-core-nctest --input samplesheet.csv --bed_file test.bed.gz --outdir results -profile docker
+nextflow run path-to/wutest --input samplesheet.csv --bed_file test.bed.gz --outdir results -profile docker
 ```
 
 ### Run pipeline with singularity
 You can run the pipeline with Singularity if you have Singularity installed. The command-line is as follows:
 ```bash
-nextflow run path-to/nf-core-nctest --input samplesheet.csv --bed_file test.bed.gz --outdir results -profile singularity
+nextflow run path-to/wutest --input samplesheet.csv --bed_file test.bed.gz --outdir results -profile singularity
 ```
 
 It is good to set a environmental variable NXF_SINGULARITY_CACHEDIR to store and re-use the images from a central location for future pipeline runs especially when using a computing cluster. The command-line is as follows:
@@ -85,7 +85,7 @@ export NXF_SINGULARITY_CACHEDIR=path-to-singularity-images
 ### Run pipeline with Conda
 You can run the pipeline with Conda if you have Conda installed. The command-line is as follows:
 ```bash
-nextflow run path-to/nf-core-nctest --input samplesheet.csv --bed_file test.bed.gz --outdir results -profile conda
+nextflow run path-to/wutest --input samplesheet.csv --bed_file test.bed.gz --outdir results -profile conda
 ```
 Note that Conda is considered as last resort by Nextflow since its poorer reproducibility than Docker/Singularity.
 
@@ -117,7 +117,7 @@ The pipeline wutest has following parameters:
 
 For example, following command-line will run the pipeline by skipping PICARD_MARKDUPLICATES and filtering out reads with mapping quality larger than 10.
 ```bash
-nextflow run path-to/nf-core-nctest --input samplesheet.csv --bed_file test.bed.gz --outdir results -profile docker --skip_picard true --samtools_view_args "-q 10"
+nextflow run path-to/wutest --input samplesheet.csv --bed_file test.bed.gz --outdir results -profile docker --skip_picard true --samtools_view_args "-q 10"
 ```
 
 ## Outputs
@@ -141,7 +141,7 @@ If the pipeline runs successfully, it will produce output files in predefined di
 The functionality of a Python script can be tested using pytest package.
 I did test for script 'count_reads_from_bam.py'. The test script is 'test_count_reads_from_bam.py' in 'bin/tests', and run the test with following command-lines:
 ```bash
-cd path-to/nf-core-nctest/bin/tests
+cd path-to/wutest/bin/tests
 pytest
 ```
 It will get test data from subfolder 'test_data' and perform 5 unit tests.
@@ -158,7 +158,7 @@ For demonstration, I did following tests.
 
 The relevant command-lines are as follows:
  ```bash
-cd path-to/nf-core-nctest
+cd path-to/wutest
 nf-test generate process modules/nf-core/samtools/view/main.nf
 nf-test test tests/modules/nf-core/samtools/view/main.nf.test
 ```
@@ -168,7 +168,7 @@ This test will produce a reference snapshot file 'main.nf.test.snap' for repeate
 
 The relevant command-lines are as follows:
  ```bash
-cd path-to/nf-core-nctest
+cd path-to/wutest
 nf-test generate workflow subworkflows/local/filter_bam.nf
 nf-test test tests/subworkflows/local/filter_bam.nf.test
 ```
@@ -178,7 +178,7 @@ This test will produce a reference snapshot file 'filter_bam.nf.test.snap' for r
 
 This test can check execution correctness and integrity of output files for whole pipeline. The relevant command-lines are as follows:
  ```bash
-cd path-to/nf-core-nctest
+cd path-to/wutest
 nf-test generate pipeline main.nf
 nf-test test tests/main.nf.test
-``` 
+```
