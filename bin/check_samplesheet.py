@@ -40,8 +40,8 @@ class RowChecker:
         Args:
             sample_col (str): The name of the column that contains the sample name
                 (default "sample").
-            first_col (str): The name of the column that contains the first (or only)
-                BAM file path (default "bam_file").
+            first_col (str): The name of the column that contains the BAM file path
+            (default "bam_file").
         """
         super().__init__(**kwargs)
         self._sample_col = sample_col
